@@ -1,23 +1,31 @@
 import { useState, useEffect } from "react";
 
-function Hello() {
-  useEffect((() => {
-    console.log('create');
-    return () => console.log('destoryed');
-  }), []);
-  return <h1>Hello</h1>;
-}
-
 function App() {
-  const [showing, setShowing] = useState(false);
-  const onClick = () => {
-    setShowing((prev) => !prev);
+  const [toDo, setToDo] = useState("");
+  const [toDos, setToDos] = useState([]);
+  const onChange = (event) => {
+    setToDo(event.target.value);
+    console.log(toDo);
   };
-
+  const onSubmit = (event) => {
+    event.preventDefault();
+    if (toDo === '') {
+      return;
+    }
+    setToDo("");
+    setToDos(currentArray => [toDo, ...currentArray]);
+  }
   return (
     <div>
-      {showing ? <Hello /> : null}
-      <button onClick={onClick}>{showing ? "Hide" : "Show"}</button>
+      <form onSubmit={onSubmit}> 
+        <input
+          onChange={onChange}
+          value={toDo}
+          placeholder="할일 입력"
+          type="text"
+        />
+        <button>Add to do</button>
+      </form>
     </div>
   );
 }
