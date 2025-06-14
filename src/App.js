@@ -1,17 +1,23 @@
 import { useState, useEffect } from "react";
+
+function Hello() {
+  useEffect((() => {
+    console.log('create');
+    return () => console.log('destoryed');
+  }), []);
+  return <h1>Hello</h1>;
+}
+
 function App() {
-  const [counter, setCounter] = useState(0);
+  const [showing, setShowing] = useState(false);
   const onClick = () => {
-    setCounter((prev) => prev + 1);
+    setShowing((prev) => !prev);
   };
-  console.log("i run everyTime");
-  useEffect(() => {
-    console.log("i run once");
-  }, []);
+
   return (
     <div>
-      <h1>{counter}</h1>
-      <button onClick={onClick}>up</button>
+      {showing ? <Hello /> : null}
+      <button onClick={onClick}>{showing ? "Hide" : "Show"}</button>
     </div>
   );
 }
