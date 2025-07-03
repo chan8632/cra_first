@@ -1,15 +1,12 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+
 function App() {
   const [loading, setLoading] = useState(true);
-  // 코인들 정보
   const [coins, setCoins] = useState([]);
-  // 달러 state
   const [dollar, setDollar] = useState(0);
-  // 코인 몇 개 살 수 있냐.
   const [coinCount, setCoinCount] = useState(0);
-  // 코인 가치
-  const [coinValue, setCoinValue] = useState(0);
-  // 코인 정보 가져오고 coin state에 정보 가져오기
+  const [selectedCoinValue, setSelectedCoinValue] = useState(0);
+
   useEffect(() => {
     fetch("https://api.coinpaprika.com/v1/tickers")
       .then((response) => response.json())
@@ -22,22 +19,36 @@ function App() {
   const dollarChange = (event) => {
     setDollar(event.target.value);
   };
+
   const coinSelect = (event) => {
     const data = event.target.value;
-    const selectedCoinValue = parseInt(data.match(/\$(\d+)\./)[1], 10);
-    setCoinValue(selectedCoinValue);
+    const match = data.match(/\$(\d+)\./);
+    if (match) {
+      const coinValue = parseInt(match[1], 10);
+      setSelectedCoinValue(coinValue);
+    }
   };
+
+  // dollar 또는 선택된 코인 가격이 바뀔 때마다 재계산
   useEffect(() => {
-    const selectedCoinCount = Math.floor(dollar / coinValue);
-    setCoinCount(selectedCoinCount);
-  }, [dollar, coinValue])
+    if (selectedCoinValue && dollar) {
+      const count = Math.floor(dollar / selectedCoinValue);
+      setCoinCount(count);
+    } else {
+      setCoinCount(0);
+    }
+  }, [dollar, selectedCoinValue]);
+
   return (
     <div>
       <h1>The Coins! {loading ? null : coins.length}</h1>
       {loading ? (
         <strong>Loading</strong>
       ) : (
-        <select onChange={coinSelect}>
+        <select onChange={coinSelect} defaultValue="">
+          <option value="" disabled>
+            코인을 선택하세요
+          </option>
           {coins.map((coin) => (
             <option key={coin.id}>
               {coin.name} ({coin.symbol}): ${coin.quotes.USD.price} USD
