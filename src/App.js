@@ -1,63 +1,40 @@
 import { useEffect, useState } from "react";
 function App() {
   const [loading, setLoading] = useState(true);
-  // 코인들 정보
-  const [coins, setCoins] = useState([]);
-  // 달러 state
-  const [dollar, setDollar] = useState(0);
-  // 코인 몇 개 살 수 있냐.
-  const [coinCount, setCoinCount] = useState(0);
-  // 코인 가치
-  const [coinValue, setCoinValue] = useState(0);
-  // 코인 정보 가져오고 coin state에 정보 가져오기
+  const [movies, setMovies] = useState([]);
+  const getMovies = async () => {
+    const json = await (
+      await fetch(
+        "https://yts.mx/api/v2/list_movies.json?minimum_rating=9&sort_by=year"
+      )
+    ).json();
+    setMovies(json.data.movies);
+    setLoading(false);
+    console.log(json);
+  };
   useEffect(() => {
-    fetch("https://api.coinpaprika.com/v1/tickers")
-      .then((response) => response.json())
-      .then((json) => {
-        setCoins(json);
-        setLoading(false);
-      });
+    getMovies();
   }, []);
-
-  const dollarChange = (event) => {
-    setDollar(event.target.value);
-  };
-  const coinSelect = (event) => {
-    const data = event.target.value;
-    const selectedCoinValue = parseInt(data.match(/\$(\d+)\./)[1], 10);
-    setCoinValue(selectedCoinValue);
-  };
-  useEffect(() => {
-    if (dollar && coinValue) {
-      const selectedCoinCount = Math.floor(dollar / coinValue);
-      setCoinCount(selectedCoinCount);
-    } else {
-      setCoinCount(0);
-    }
-  }, [dollar, coinValue]);
   return (
     <div>
-      <h1>The Coins! {loading ? null : coins.length}</h1>
       {loading ? (
-        <strong>Loading</strong>
+        <h1>Loading...</h1>
       ) : (
-        <select onChange={coinSelect}>
-          {coins.map((coin) => (
-            <option key={coin.id}>
-              {coin.name} ({coin.symbol}): ${coin.quotes.USD.price} USD
-            </option>
+        <div>
+          {movies.map((movie) => (
+            <div key={movie.id}>
+              <img alt={movie.title}src={movie.medium_cover_image} />
+              <h1>{movie.title}</h1>
+              <div>{movie.summary}</div>
+              <ul>
+                {movie.genres.map((g) => (
+                  <li key={g}>{g}</li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </select>
+        </div>
       )}
-      <hr />
-      <input
-        onChange={dollarChange}
-        value={dollar}
-        type="number"
-        placeholder="달러를 작성하세요"
-      />
-      <span>$</span>
-      <div>{coinCount}개 살 수 있습니다.</div>
     </div>
   );
 }
